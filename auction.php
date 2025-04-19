@@ -45,6 +45,7 @@ $highlight_item = isset($_GET['new_item']) ? (int)$_GET['new_item'] : 0;
         <div class="navbar-center">
             <a href="index.php" class="nav-link">Home</a>
             <a href="auction.php" class="nav-link active">Auction</a>
+            <a href="about.php" class="nav-link">About</a>
         </div>
         <div class="navbar-right">
             <?php if (isset($_SESSION['user_id'])): ?>

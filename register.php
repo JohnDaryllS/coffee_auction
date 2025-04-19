@@ -19,6 +19,7 @@
         <div class="navbar-center">
             <a href="index.php" class="nav-link">Home</a>
             <a href="auction.php" class="nav-link">Auction</a>
+            <a href="about.php" class="nav-link">About</a>
         </div>
         <div class="navbar-right">
             <a href="login.php" class="btn btn-outline">Login</a>

@@ -25,6 +25,7 @@ $is_home = ($current_page == 'index.php' || $current_page == 'user_account.php')
         <div class="navbar-center">
             <a href="index.php" class="nav-link <?= $is_home ? 'active' : '' ?>">Home</a>
             <a href="auction.php" class="nav-link <?= $current_page == 'auction.php' ? 'active' : '' ?>">Auction</a>
+            <a href="about.php" class="nav-link <?= $current_page == 'about.php' ? 'active' : '' ?>">About</a>
         </div>
         <div class="navbar-right">
             <?php if (isset($_SESSION['user_id'])): ?>
@@ -46,30 +47,51 @@ $is_home = ($current_page == 'index.php' || $current_page == 'user_account.php')
     </header>
 
     <main class="container">
-        <section class="featured-auctions">
-            <h2>Featured Auctions</h2>
-            <div class="auction-grid">
-                <?php
-                $stmt = $pdo->query("SELECT * FROM items LIMIT 4");
-                while ($item = $stmt->fetch()) {
-                    // Get highest bid for this item
-                    $bidStmt = $pdo->prepare("SELECT MAX(bid_amount) as max_bid FROM bids WHERE item_id = ?");
-                    $bidStmt->execute([$item['id']]);
-                    $bid = $bidStmt->fetch();
-                    $currentBid = $bid['max_bid'] ? $bid['max_bid'] : $item['starting_price'];
-                    
-                    echo '<div class="auction-card">
-                        <div class="auction-image" style="background-image: url(images/' . $item['image'] . ')"></div>
-                        <div class="auction-details">
-                            <h3>' . htmlspecialchars($item['name']) . '</h3>
-                            <p class="current-bid">Current Bid: $' . number_format($currentBid, 2) . '</p>
-                            <a href="product_view.php?id=' . (int)$item['id'] . '" class="btn btn-outline">View Auction</a>
-                        </div>
-                    </div>';
-                }
-                ?>
-            </div>
-        </section>
+    <section class="featured-auctions">
+    <div class="section-header">
+        <h2>Featured Auctions</h2>
+        <a href="auction.php" class="btn btn-outline">View All</a>
+    </div>
+    <div class="auction-grid">
+        <?php
+        $stmt = $pdo->query("SELECT * FROM items WHERE bid_end_date > NOW() ORDER BY RAND() LIMIT 4");
+        while ($item = $stmt->fetch()) {
+            // Get highest bid for this item
+            $bidStmt = $pdo->prepare("SELECT MAX(bid_amount) as max_bid FROM bids WHERE item_id = ?");
+            $bidStmt->execute([$item['id']]);
+            $bid = $bidStmt->fetch();
+            $currentBid = $bid['max_bid'] ? $bid['max_bid'] : $item['starting_price'];
+            
+            echo '<div class="auction-card">
+                <div class="auction-image" style="background-image: url(images/' . $item['image'] . ')"></div>
+                <div class="auction-details">
+                    <h3>' . htmlspecialchars($item['name']) . '</h3>
+                    <p class="current-bid">Current Bid: $' . number_format($currentBid, 2) . '</p>
+                    <div class="time-remaining">
+                        <i class="fas fa-clock"></i> ' . timeRemaining($item['bid_end_date']) . '
+                    </div>
+                    <a href="product_view.php?id=' . (int)$item['id'] . '" class="btn btn-outline">View Auction</a>
+                </div>
+            </div>';
+        }
+        
+        // Helper function to calculate time remaining
+        function timeRemaining($endDate) {
+            $now = new DateTime();
+            $end = new DateTime($endDate);
+            $interval = $now->diff($end);
+            
+            if ($interval->d > 0) {
+                return $interval->d . 'd ' . $interval->h . 'h left';
+            } elseif ($interval->h > 0) {
+                return $interval->h . 'h ' . $interval->i . 'm left';
+            } else {
+                return $interval->i . 'm left';
+            }
+        }
+        ?>
+    </div>
+</section>
     </main>
 
     <footer class="footer">
