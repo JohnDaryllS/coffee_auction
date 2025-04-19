@@ -33,15 +33,8 @@ $end_date = new DateTime($product['bid_end_date']);
 $is_active = $end_date > $now;
 $time_remaining = $is_active ? $now->diff($end_date)->format('%a days %h hours %i minutes') : 'Auction ended';
 
-// Get bid history
-$historyStmt = $pdo->prepare("SELECT b.*, u.fullname 
-                             FROM bids b JOIN users u ON b.user_id = u.id 
-                             WHERE b.item_id = ? ORDER BY b.bid_amount DESC");
-$historyStmt->execute([$product_id]);
-$bidHistory = $historyStmt->fetchAll();
-
-// Check if user can bid
-$can_bid = isset($_SESSION['user_id']) && !isset($_SESSION['admin_logged_in']) && $is_active;
+// Check if user can see bid history
+$show_bid_history = isset($_SESSION['user_id']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -51,22 +44,29 @@ $can_bid = isset($_SESSION['user_id']) && !isset($_SESSION['admin_logged_in']) &
     <title><?= htmlspecialchars($product['name']) ?> - Coffee Auction</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="navbar-left">
             <div class="logo">
-                <a href=""><img src="images/1.png" alt="" style="width:50px;"></a>
+                <img src="images/crop.png" alt="Coffee-Auction" style="width:50px;">
+                <span class="logo-text">Coffee Auction</span>
             </div>
         </div>
         <div class="navbar-center">
-            <a href="index.php" class="nav-link active">Home</a>
+            <a href="index.php" class="nav-link">Home</a>
             <a href="auction.php" class="nav-link">Auction</a>
             <a href="about.php" class="nav-link">About</a>
         </div>
         <div class="navbar-right">
-            <a href="login.php" class="btn btn-outline">Login</a>
-            <a href="register.php" class="btn btn-primary">Register</a>
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <span class="user-greeting">Hi, <?= htmlspecialchars($_SESSION['user_name']) ?></span>
+                <a href="logout.php" class="btn btn-outline">Logout</a>
+            <?php else: ?>
+                <a href="login.php" class="btn btn-outline">Login</a>
+                <a href="register.php" class="btn btn-primary">Register</a>
+            <?php endif; ?>
         </div>
     </nav>
 
@@ -90,11 +90,11 @@ $can_bid = isset($_SESSION['user_id']) && !isset($_SESSION['admin_logged_in']) &
                 <div class="bid-info">
                     <div class="info-row">
                         <span class="label">Starting Price:</span>
-                        <span class="value">$<?= number_format($product['starting_price'], 2) ?></span>
+                        <span class="value">₱<?= number_format($product['starting_price'], 2) ?></span>
                     </div>
                     <div class="info-row">
                         <span class="label">Current Bid:</span>
-                        <span class="value">$<?= number_format($currentBid, 2) ?></span>
+                        <span class="value">₱<?= number_format($currentBid, 2) ?></span>
                     </div>
                     <div class="info-row">
                         <span class="label">Bids:</span>
@@ -112,83 +112,98 @@ $can_bid = isset($_SESSION['user_id']) && !isset($_SESSION['admin_logged_in']) &
                     </div>
                 </div>
                 
-                <?php if ($can_bid): ?>
-                    <div class="bid-form">
-                        <form action="process_bid.php" method="post">
-                            <input type="hidden" name="item_id" value="<?= $product_id ?>">
-                            <div class="form-group">
-                                <label for="bid-amount">Your Bid ($)</label>
-                                <div class="bid-amount-container">
-                                    <input type="number" id="bid-amount" name="bid_amount" 
-                                        min="<?= $currentBid + 0.5 ?>" step="0.5" 
-                                        value="<?= $currentBid + 0.5 ?>" required>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <?php if ($is_active): ?>
+                        <div class="bid-form">
+                            <form action="process_bid.php" method="post">
+                                <input type="hidden" name="item_id" value="<?= $product_id ?>">
+                                <div class="form-group">
+                                    <label for="bid-amount">Your Bid (₱)</label>
+                                    <div class="bid-amount-container">
+                                        <input type="number" id="bid-amount" name="bid_amount" 
+                                            min="<?= $currentBid + 0.5 ?>" step="0.5" 
+                                            value="<?= $currentBid + 0.5 ?>" required>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="anonymous-checkbox">
-                                    <input type="checkbox" name="is_anonymous" value="1">
-                                    <span>Bid anonymously (your name will be hidden)</span>
-                                </label>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Place Bid</button>
-                        </form>
-                    </div>
-                <?php elseif (!isset($_SESSION['user_id'])): ?>
+                                <div class="form-group">
+                                    <label class="anonymous-checkbox">
+                                        <input type="checkbox" name="is_anonymous" value="1">
+                                        <span>Bid anonymously (your name will be hidden)</span>
+                                    </label>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Place Bid</button>
+                            </form>
+                        </div>
+                    <?php else: ?>
+                        <div class="alert alert-info">
+                            This auction has ended
+                        </div>
+                    <?php endif; ?>
+                <?php else: ?>
                     <div class="alert alert-info">
                         <a href="login.php">Login</a> to place a bid
-                    </div>
-                <?php elseif (!$is_active): ?>
-                    <div class="alert alert-info">
-                        This auction has ended
                     </div>
                 <?php endif; ?>
             </div>
         </div>
         
-        <div class="bid-history">
-            <h2>Bid History</h2>
-            <?php if (count($bidHistory) > 0): ?>
-                <table class="history-table">
-                    <thead>
-                        <tr>
-                            <th>Bidder</th>
-                            <th>Amount</th>
-                            <th>Time</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($bidHistory as $bid): ?>
+        <?php if ($show_bid_history): ?>
+            <div class="bid-history">
+                <h2>Bid History</h2>
+                <?php
+                $historyStmt = $pdo->prepare("SELECT b.*, u.fullname 
+                                             FROM bids b JOIN users u ON b.user_id = u.id 
+                                             WHERE b.item_id = ? ORDER BY b.bid_amount DESC");
+                $historyStmt->execute([$product_id]);
+                $bidHistory = $historyStmt->fetchAll();
+                
+                if (count($bidHistory) > 0): ?>
+                    <table class="history-table">
+                        <thead>
                             <tr>
-                                <td>
-                                    <?php if ($bid['is_anonymous'] && $bid['user_id'] != $_SESSION['user_id']): ?>
-                                        <span class="anonymous-bidder">Anonymous Bidder</span>
-                                    <?php else: ?>
-                                        <?= htmlspecialchars($bid['fullname']) ?>
-                                        <?php if ($bid['is_anonymous']): ?>
-                                            <span class="anonymous-you">(You)</span>
-                                        <?php endif; ?>
-                                    <?php endif; ?>
-                                </td>
-                                <td>$<?= number_format($bid['bid_amount'], 2) ?></td>
-                                <td><?= date('M j, Y H:i', strtotime($bid['timestamp'])) ?></td>
+                                <th>Bidder</th>
+                                <th>Amount</th>
+                                <th>Time</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php else: ?>
-                <p>No bids yet. Be the first to bid!</p>
-            <?php endif; ?>
-        </div>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($bidHistory as $bid): ?>
+                                <tr>
+                                    <td>
+                                        <?php if ($bid['is_anonymous'] && $bid['user_id'] != $_SESSION['user_id']): ?>
+                                            <span class="anonymous-bidder">Anonymous Bidder</span>
+                                        <?php else: ?>
+                                            <?= htmlspecialchars($bid['fullname']) ?>
+                                            <?php if ($bid['is_anonymous']): ?>
+                                                <span class="anonymous-you">(You)</span>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>₱<?= number_format($bid['bid_amount'], 2) ?></td>
+                                    <td><?= date('M j, Y H:i', strtotime($bid['timestamp'])) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+                    <p>No bids yet. Be the first to bid!</p>
+                <?php endif; ?>
+            </div>
+        <?php else: ?>
+            <div class="alert alert-info">
+                <a href="login.php">Login</a> to view bid history
+            </div>
+        <?php endif; ?>
     </main>
 
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-logo">
-                <span class="logo-icon">☕</span>
+                <img src="images/crop.png" alt="Coffee-Auction" style="width:50px;">
                 <span class="logo-text">Coffee Auction</span>
             </div>
             <div class="footer-links">
-                <a href="#">About Us</a>
+                <a href="about.php">About Us</a>
                 <a href="#">Terms</a>
                 <a href="#">Privacy</a>
                 <a href="#">Contact</a>

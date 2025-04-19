@@ -4,6 +4,17 @@
 // Get current page filename
 $current_page = basename($_SERVER['PHP_SELF']);
 $is_home = ($current_page == 'index.php' || $current_page == 'user_account.php');
+
+// Get the item with the highest current bid
+$highestBidStmt = $pdo->query("SELECT i.*, MAX(b.bid_amount) as max_bid 
+                              FROM items i 
+                              LEFT JOIN bids b ON i.id = b.item_id 
+                              WHERE i.bid_end_date > NOW()
+                              GROUP BY i.id 
+                              ORDER BY max_bid DESC 
+                              LIMIT 1");
+$highestBidItem = $highestBidStmt->fetch();
+$highestBid = $highestBidItem ? ($highestBidItem['max_bid'] ?: $highestBidItem['starting_price']) : 0;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -14,6 +25,98 @@ $is_home = ($current_page == 'index.php' || $current_page == 'user_account.php')
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
+<style>
+    /* Hero Section */
+.hero {
+    position: relative;
+    height: 80vh;
+    overflow: hidden;
+    color: white;
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.hero-content {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative;
+    z-index: 2;
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    margin-bottom: 1.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.hero p {
+    font-size: 1.5rem;
+    margin-bottom: 2.5rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.highest-bid-banner {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 2rem auto;
+    max-width: 500px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.bid-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.bid-info .label {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: brown;
+}
+
+.bid-info .amount {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f8c537;
+}
+
+.item-info {
+    font-style: italic;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+    
+    .hero p {
+        font-size: 1.2rem;
+    }
+    
+    .bid-info {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .bid-info .amount {
+        font-size: 1.8rem;
+    }
+}
+</style>
 <body>
     <nav class="navbar">
         <div class="navbar-left">
@@ -42,6 +145,19 @@ $is_home = ($current_page == 'index.php' || $current_page == 'user_account.php')
         <div class="hero-content">
             <h1>Discover Rare & Premium Coffee Beans</h1>
             <p>Bid on the world's finest coffee selections from small farms and specialty growers</p>
+
+            <?php if ($highestBidItem): ?>
+                <div class="highest-bid-banner">
+                    <div class="bid-info">
+                        <span class="label">Highest Current Bid:</span>
+                        <span class="amount">₱<?= number_format($highestBid, 2) ?></span>
+                    </div>
+                    <div class="item-info">
+                        For "<?= htmlspecialchars($highestBidItem['name']) ?>"
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <a href="auction.php" class="btn btn-primary btn-large">View Auctions</a>
         </div>
     </header>
@@ -66,7 +182,7 @@ $is_home = ($current_page == 'index.php' || $current_page == 'user_account.php')
                 <div class="auction-image" style="background-image: url(images/' . $item['image'] . ')"></div>
                 <div class="auction-details">
                     <h3>' . htmlspecialchars($item['name']) . '</h3>
-                    <p class="current-bid">Current Bid: $' . number_format($currentBid, 2) . '</p>
+                    <p class="current-bid">Current Bid: ₱' . number_format($currentBid, 2) . '</p>
                     <div class="time-remaining">
                         <i class="fas fa-clock"></i> ' . timeRemaining($item['bid_end_date']) . '
                     </div>

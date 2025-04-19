@@ -174,7 +174,7 @@ $currentDateTime = date('Y-m-d\TH:i');
                     </div>
                     
                     <div class="form-group">
-                        <label for="item-price">Starting Price ($)</label>
+                        <label for="item-price">Starting Price (₱)</label>
                         <input type="number" id="item-price" name="starting_price" class="form-control" min="0.01" step="0.01" required>
                     </div>
                     

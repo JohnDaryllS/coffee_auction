@@ -16,7 +16,152 @@ $highlight_item = isset($_GET['new_item']) ? (int)$_GET['new_item'] : 0;
     <title><?php echo $is_admin_view ? 'Admin Auction View' : 'Coffee Auctions'; ?> - Coffee Auction</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
+<style>
+    /* Auction Container */
+.auction-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Auction Sections */
+.active-auctions, .ended-auctions {
+    margin-bottom: 4rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.time-info {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.time-info i {
+    color: var(--primary-color);
+    margin-right: 0.5rem;
+}
+
+/* Auction Grid Layout */
+.auction-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.auction-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+/* Auction Card Styles */
+.auction-card {
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.auction-card.ended {
+    opacity: 0.8;
+    background-color: #f8f9fa;
+}
+
+.auction-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.auction-card.ended:hover {
+    transform: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.auction-image {
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+}
+
+.auction-details {
+    padding: 1.5rem;
+}
+
+.auction-details h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bid-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.current-bid {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.bid-count {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.time-remaining, .time-ended {
+    font-size: 0.9rem;
+    margin: 0.5rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.time-remaining {
+    color: var(--primary-color);
+}
+
+.time-ended {
+    color: var(--error-color);
+}
+
+.auction-details .btn {
+    width: 100%;
+    text-align: center;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .auction-row {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .auction-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
 <body>
     <?php if ($is_admin_view): ?>
     <nav class="navbar admin-nav">
@@ -28,6 +173,7 @@ $highlight_item = isset($_GET['new_item']) ? (int)$_GET['new_item'] : 0;
         </div>
         <div class="navbar-center">
             <a href="admin.php" class="nav-link">Admin Dashboard</a>
+            <a href="about.php" class="nav-link">About</a>
         </div>
         <div class="navbar-right">
             <span class="admin-greeting">Admin Panel</span>
@@ -87,122 +233,65 @@ $highlight_item = isset($_GET['new_item']) ? (int)$_GET['new_item'] : 0;
             </div>
         <?php endif; ?>
         
-        <div class="auction-list">
-            <?php
-            $now = new DateTime();
-            $stmt = $pdo->query("SELECT * FROM items ORDER BY bid_end_date ASC");
-            
-            if ($stmt->rowCount() > 0) {
-                while ($item = $stmt->fetch()) {
-                    // Get highest bid for this item
-                    $bidStmt = $pdo->prepare("SELECT MAX(bid_amount) as max_bid, 
-                                            (SELECT COUNT(*) FROM bids WHERE item_id = ?) as bid_count
-                                            FROM bids WHERE item_id = ?");
-                    $bidStmt->execute([$item['id'], $item['id']]);
-                    $bid = $bidStmt->fetch();
-                    $currentBid = $bid['max_bid'] ? $bid['max_bid'] : $item['starting_price'];
-                    $bidCount = $bid['bid_count'];
+        <div class="auction-container">
+            <section class="active-auctions">
+                <div class="section-header">
+                    <h2>Active Auctions</h2>
+                    <div class="time-info">
+                        <i class="fas fa-clock"></i> Current Time: <?php echo date('M j, Y H:i'); ?>
+                    </div>
+                </div>
+                
+                <div class="auction-grid">
+                    <?php
+                    $now = new DateTime();
+                    $activeAuctions = [];
+                    $endedAuctions = [];
                     
-                    // Calculate time remaining
-                    $end_date = new DateTime($item['bid_end_date']);
-                    $is_active = $end_date > $now;
-                    $time_remaining = '';
-                    
-                    if ($is_active) {
-                        $interval = $now->diff($end_date);
-                        $time_remaining = $interval->format('%a days %h hours %i minutes');
-                    }
-                    
-                    // Check if limited item is available
-                    $is_available = true;
-                    if ($item['is_limited'] && $item['items_sold'] >= $item['quantity']) {
-                        $is_available = false;
-                    }
-                    
-                    echo '<div class="auction-item' . 
-                         ($item['id'] == $highlight_item ? ' highlight-new' : '') . 
-                         ($is_active ? '' : ' auction-ended') . 
-                         '" id="item-' . $item['id'] . '">';
-                    
-                    if ($is_admin_view) {
-                        echo '<div class="admin-view-indicator">Admin View</div>';
-                    }
-                    
-                    // Limited quantity badge
-                    if ($item['is_limited']) {
-                        $remaining = $item['quantity'] - $item['items_sold'];
-                        echo '<div class="limited-badge">Limited: ' . $remaining . ' left</div>';
-                    }
-                    
-                    echo '<div class="auction-item-image" style="background-image: url(images/' . $item['image'] . ')"></div>
-                        <div class="auction-item-details">
-                            <h3>' . htmlspecialchars($item['name']) . '</h3>
-                            <p class="item-description">' . htmlspecialchars($item['description']) . '</p>
-                            
-                            <div class="bid-info">
-                                <div class="bid-current">
-                                    <span class="bid-label">Current Bid:</span>
-                                    <span class="bid-amount">$' . number_format($currentBid, 2) . '</span>
-                                </div>
-                                <div class="bid-count">
-                                    ' . $bidCount . ' bid' . ($bidCount != 1 ? 's' : '') . '
-                                </div>
-                            </div>
-                            
-                            <div class="time-info">';
-                    
-                    if ($is_active) {
-                        echo '<div class="time-remaining">
-                                <strong>Ends in:</strong> ' . $time_remaining . '
-                              </div>
-                              <div class="end-time">
-                                (Ends at ' . $end_date->format('M j, Y H:i') . ')
-                              </div>';
-                    } else {
-                        echo '<div class="time-ended">
-                                <strong>Auction Ended</strong> on ' . $end_date->format('M j, Y H:i') . '
-                              </div>';
-                    }
-                    
-                    echo '</div>';
-                    
-                    if ($can_bid) {
-                        if ($is_active && $is_available) {
-                            echo '<form action="process_bid.php" method="post" class="bid-form">
-                                    <input type="hidden" name="item_id" value="' . $item['id'] . '">
-                                    <div class="form-group">
-                                        <label for="bid-amount-' . $item['id'] . '">Your Bid ($)</label>
-                                        <input type="number" id="bid-amount-' . $item['id'] . '" name="bid_amount" 
-                                            min="' . ($currentBid + 0.5) . '" step="0.5" 
-                                            value="' . ($currentBid + 0.5) . '" required>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Place Bid</button>
-                                </form>';
-                        } elseif (!$is_available) {
-                            echo '<div class="out-of-stock">Out of Stock</div>';
+                    // Get all auctions and separate active from ended
+                    $stmt = $pdo->query("SELECT * FROM items ORDER BY bid_end_date ASC");
+                    while ($item = $stmt->fetch()) {
+                        $end_date = new DateTime($item['bid_end_date']);
+                        if ($end_date > $now) {
+                            $activeAuctions[] = $item;
                         } else {
-                            echo '<div class="bid-notice">Bidding for this item has ended</div>';
+                            $endedAuctions[] = $item;
                         }
-                    } elseif ($is_admin_view) {
-                        echo '<div class="admin-auction-actions">
-                                <a href="admin.php?edit_item=' . $item['id'] . '#items-tab" class="btn btn-outline btn-small">Edit</a>
-                                <form action="process_item.php" method="post" class="inline-form">
-                                    <input type="hidden" name="item_id" value="' . $item['id'] . '">
-                                    <button type="submit" name="action" value="delete" class="btn btn-error btn-small">Delete</button>
-                                </form>
-                              </div>';
                     }
                     
-                    echo '</div>
-                        </div>';
-                }
-            } else {
-                echo '<div class="empty-state">
-                        <p>No auction items available at this time.</p>
-                        ' . ($is_admin_view ? '<a href="admin.php#items-tab" class="btn btn-primary">Add New Item</a>' : '') . '
-                      </div>';
-            }
-            ?>
+                    // Display active auctions (max 4 per row)
+                    $activeChunks = array_chunk($activeAuctions, 4);
+                    foreach ($activeChunks as $chunk) {
+                        echo '<div class="auction-row">';
+                        foreach ($chunk as $item) {
+                            displayAuctionItem($item, false, $is_admin_view);
+                        }
+                        echo '</div>';
+                    }
+                    ?>
+                </div>
+            </section>
+
+            <?php if (!empty($endedAuctions)): ?>
+            <section class="ended-auctions">
+                <div class="section-header">
+                    <h2>Ended Auctions</h2>
+                </div>
+                
+                <div class="auction-grid">
+                    <?php
+                    $endedChunks = array_chunk($endedAuctions, 4);
+                    foreach ($endedChunks as $chunk) {
+                        echo '<div class="auction-row">';
+                        foreach ($chunk as $item) {
+                            displayAuctionItem($item, true, $is_admin_view);
+                        }
+                        echo '</div>';
+                    }
+                    ?>
+                </div>
+            </section>
+            <?php endif; ?>
         </div>
     </main>
 
@@ -213,7 +302,7 @@ $highlight_item = isset($_GET['new_item']) ? (int)$_GET['new_item'] : 0;
                 <span class="logo-text">Coffee Auction</span>
             </div>
             <div class="footer-links">
-                <a href="#">About Us</a>
+                <a href="about.php">About Us</a>
                 <a href="#">Terms</a>
                 <a href="#">Privacy</a>
                 <a href="#">Contact</a>
@@ -232,3 +321,74 @@ $highlight_item = isset($_GET['new_item']) ? (int)$_GET['new_item'] : 0;
     </script>
 </body>
 </html>
+
+<?php
+// Helper function to display auction items
+function displayAuctionItem($item, $isEnded, $isAdminView) {
+    global $pdo;
+    
+    // Get highest bid for this item
+    $bidStmt = $pdo->prepare("SELECT MAX(bid_amount) as max_bid, 
+                             (SELECT COUNT(*) FROM bids WHERE item_id = ?) as bid_count
+                             FROM bids WHERE item_id = ?");
+    $bidStmt->execute([$item['id'], $item['id']]);
+    $bid = $bidStmt->fetch();
+    $currentBid = $bid['max_bid'] ? $bid['max_bid'] : $item['starting_price'];
+    $bidCount = $bid['bid_count'];
+    
+    // Calculate time remaining if not ended
+    $timeRemaining = '';
+    if (!$isEnded) {
+        $now = new DateTime();
+        $end_date = new DateTime($item['bid_end_date']);
+        $interval = $now->diff($end_date);
+        $timeRemaining = $interval->format('%a days %h hours %i minutes');
+    }
+    
+    echo '<div class="auction-card' . ($isEnded ? ' ended' : '') . '" id="item-' . $item['id'] . '">';
+    
+    if ($isAdminView) {
+        echo '<div class="admin-view-indicator">Admin View</div>';
+    }
+    
+    // Limited quantity badge
+    if ($item['is_limited']) {
+        $remaining = $item['quantity'] - $item['items_sold'];
+        echo '<div class="limited-badge">Limited: ' . $remaining . ' left</div>';
+    }
+    
+    echo '<div class="auction-image" style="background-image: url(images/' . $item['image'] . ')"></div>
+        <div class="auction-details">
+            <h3>' . htmlspecialchars($item['name']) . '</h3>
+            <div class="bid-info">
+                <span class="current-bid">₱' . number_format($currentBid, 2) . '</span>
+                <span class="bid-count">' . $bidCount . ' bid' . ($bidCount != 1 ? 's' : '') . '</span>
+            </div>';
+            
+    if ($isEnded) {
+        echo '<div class="time-ended">
+                <i class="fas fa-ban"></i> Ended
+              </div>';
+    } else {
+        echo '<div class="time-remaining">
+                <i class="fas fa-clock"></i> ' . $timeRemaining . ' left
+              </div>';
+    }
+    
+    if ($isAdminView) {
+        echo '<div class="admin-auction-actions">
+                <a href="admin.php?edit_item=' . $item['id'] . '#items-tab" class="btn btn-outline btn-small">Edit</a>
+                <form action="process_item.php" method="post" class="inline-form">
+                    <input type="hidden" name="item_id" value="' . $item['id'] . '">
+                    <button type="submit" name="action" value="delete" class="btn btn-error btn-small">Delete</button>
+                </form>
+              </div>';
+    } else {
+        echo '<a href="product_view.php?id=' . $item['id'] . '" class="btn btn-outline">' . 
+             ($isEnded ? 'View Results' : 'Place Bid') . '</a>';
+    }
+    
+    echo '</div>
+    </div>';
+}
+?>
