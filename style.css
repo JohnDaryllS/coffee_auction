@@ -580,12 +580,23 @@ input[type="datetime-local"] {
     cursor: pointer;
 }
 
-/* Search Form */
-#search-users-form {
-    background: white;
-    padding: 1rem;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+/* Search Form Styles */
+.search-form {
+    margin-bottom: 1.5rem;
+}
+
+.search-form .form-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.search-form .form-control {
+    flex: 1;
+    min-width: 250px;
+}
+
+.search-form .btn {
+    white-space: nowrap;
 }
 
 /* Footer */

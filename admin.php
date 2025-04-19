@@ -29,6 +29,7 @@ $currentDateTime = date('Y-m-d\TH:i');
     <title>Admin Dashboard - Coffee Auction</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <nav class="navbar admin-nav">
@@ -39,7 +40,7 @@ $currentDateTime = date('Y-m-d\TH:i');
             </div>
         </div>
         <div class="navbar-center">
-            <a href="admin.php" class="nav-link active">Admin Dashboard</a>
+            <a href="admin.php?tab=users" class="nav-link <?= ($_GET['tab'] ?? 'users') === 'users' ? 'active' : '' ?>">Admin Dashboard</a>
         </div>
         <div class="navbar-right">
             <a href="logout.php" class="btn btn-outline">Logout</a>
@@ -48,116 +49,150 @@ $currentDateTime = date('Y-m-d\TH:i');
 
     <main class="container admin-container">
         <?php if (isset($message)): ?>
-            <div class="alert alert-success"><?php echo $message; ?></div>
+            <div class="alert alert-success"><?= $message ?></div>
         <?php endif; ?>
         
         <?php if (isset($error)): ?>
-            <div class="alert alert-error"><?php echo $error; ?></div>
+            <div class="alert alert-error"><?= $error ?></div>
         <?php endif; ?>
         
         <h1>Admin Dashboard</h1>
         
         <div class="admin-tabs">
-            <button class="tab-btn active" data-tab="users">User Management</button>
-            <button class="tab-btn" data-tab="items">Coffee Auctions</button>
+            <button class="tab-btn <?= ($_GET['tab'] ?? 'users') === 'users' ? 'active' : '' ?>" data-tab="users">User Management</button>
+            <button class="tab-btn <?= ($_GET['tab'] ?? '') === 'items' ? 'active' : '' ?>" data-tab="items">Coffee Auctions</button>
         </div>
         
-        <section class="tab-content active" id="users-tab">
+        <section class="tab-content <?= ($_GET['tab'] ?? 'users') === 'users' ? 'active' : '' ?>" id="users-tab">
             <h2>User Management</h2>
             
             <div class="admin-actions">
-                <button id="search-users-btn" class="btn btn-outline">Search Users</button>
-                <div id="search-users-form" style="display: none; margin-top: 1rem;">
-                    <form method="get" action="admin.php">
-                        <input type="text" name="search" placeholder="Search by name or email" class="form-control" style="display: inline-block; width: auto;">
-                        <button type="submit" class="btn btn-primary">Search</button>
-                        <a href="admin.php" class="btn btn-outline">Clear</a>
+                <button id="search-users-btn" class="btn btn-outline">
+                    <i class="fas fa-search"></i> Search Users
+                </button>
+                <div id="search-users-form" style="display: <?= isset($_GET['search']) ? 'block' : 'none' ?>; margin-top: 1rem;">
+                    <form method="get" action="admin.php" class="search-form">
+                        <input type="hidden" name="tab" value="users">
+                        <div class="form-group">
+                            <input type="text" name="search" placeholder="Search by name, email or phone" 
+                                   class="form-control" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                            <?php if (!empty($_GET['search'])): ?>
+                                <a href="admin.php?tab=users" class="btn btn-outline">
+                                    <i class="fas fa-times"></i> Clear
+                                </a>
+                            <?php endif; ?>
+                        </div>
                     </form>
                 </div>
             </div>
             
             <?php
-            $search = isset($_GET['search']) ? $_GET['search'] : '';
-            $query = "SELECT * FROM users WHERE role = 'user'";
-            if (!empty($search)) {
-                $query .= " AND (fullname LIKE :search OR email LIKE :search)";
-                $params = ['search' => "%$search%"];
-            } else {
+                // Get search parameters
+                $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+                $status_filter = isset($_GET['status']) ? trim($_GET['status']) : '';
+
+                // Base query
+                $query = "SELECT * FROM users WHERE role = 'user'";
                 $params = [];
-            }
-            $query .= " ORDER BY status, created_at DESC";
-            
-            $stmt = $pdo->prepare($query);
-            $stmt->execute($params);
-            $users = $stmt->fetchAll();
+
+                // Add conditions
+                if (!empty($search)) {
+                    $query .= " AND (fullname LIKE ? OR email LIKE ? OR phone LIKE ?)";
+                    array_push($params, "%$search%", "%$search%", "%$search%");
+                }
+
+                // Add status filter
+                $valid_statuses = ['pending', 'approved', 'suspended'];
+                if (!empty($status_filter) && in_array($status_filter, $valid_statuses)) {
+                    $query .= " AND status = ?";
+                    $params[] = $status_filter;
+                }
+
+                // Add sorting
+                $query .= " ORDER BY status, created_at DESC";
+
+                try {
+                    $stmt = $pdo->prepare($query);
+                    $stmt->execute($params);
+                    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                } catch (PDOException $e) {
+                    die("Database error: " . $e->getMessage());
+                }
             ?>
             
             <?php if (count($users) > 0): ?>
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Status</th>
-                            <th>Registered</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($users as $user): ?>
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
                             <tr>
-                                <td><?= $user['id'] ?></td>
-                                <td><?= htmlspecialchars($user['fullname']) ?></td>
-                                <td><?= htmlspecialchars($user['email']) ?></td>
-                                <td><?= htmlspecialchars($user['phone']) ?></td>
-                                <td>
-                                    <span class="status-badge <?= $user['status'] ?>">
-                                        <?= ucfirst($user['status']) ?>
-                                    </span>
-                                </td>
-                                <td><?= date('M j, Y', strtotime($user['created_at'])) ?></td>
-                                <td class="actions-cell">
-                                    <div class="dropdown">
-                                        <button class="btn btn-outline btn-small dropdown-toggle">Actions</button>
-                                        <div class="dropdown-content">
-                                            <?php if ($user['status'] == 'pending'): ?>
-                                                <form action="process_user.php" method="post">
-                                                    <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
-                                                    <button type="submit" name="action" value="approve" class="dropdown-link">Approve User</button>
-                                                </form>
-                                            <?php endif; ?>
-                                            
-                                            <button class="dropdown-link" onclick="openPasswordModal(<?= $user['id'] ?>, '<?= htmlspecialchars($user['fullname']) ?>')">Reset Password</button>
-                                            
-                                            <?php if ($user['status'] == 'approved'): ?>
-                                                <form action="process_user.php" method="post">
-                                                    <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
-                                                    <button type="submit" name="action" value="suspend" class="dropdown-link">Suspend User</button>
-                                                </form>
-                                            <?php else: ?>
-                                                <form action="process_user.php" method="post">
-                                                    <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
-                                                    <button type="submit" name="action" value="activate" class="dropdown-link">Activate User</button>
-                                                </form>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </td>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Registered</th>
+                                <th>Actions</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($users as $user): ?>
+                                <tr>
+                                    <td><?= $user['id'] ?></td>
+                                    <td><?= htmlspecialchars($user['fullname']) ?></td>
+                                    <td><?= htmlspecialchars($user['email']) ?></td>
+                                    <td><?= htmlspecialchars($user['phone']) ?></td>
+                                    <td>
+                                        <span class="status-badge <?= $user['status'] ?>">
+                                            <?= ucfirst($user['status']) ?>
+                                        </span>
+                                    </td>
+                                    <td><?= date('M j, Y', strtotime($user['created_at'])) ?></td>
+                                    <td class="actions-cell">
+                                        <div class="dropdown">
+                                            <button class="btn btn-outline btn-small dropdown-toggle">Actions</button>
+                                            <div class="dropdown-content">
+                                                <?php if ($user['status'] == 'pending'): ?>
+                                                    <form action="process_user.php" method="post">
+                                                        <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
+                                                        <button type="submit" name="action" value="approve" class="dropdown-link">Approve User</button>
+                                                    </form>
+                                                <?php endif; ?>
+                                                
+                                                <button class="dropdown-link" onclick="openPasswordModal(<?= $user['id'] ?>, '<?= htmlspecialchars($user['fullname']) ?>')">Reset Password</button>
+                                                
+                                                <?php if ($user['status'] == 'approved'): ?>
+                                                    <form action="process_user.php" method="post">
+                                                        <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
+                                                        <button type="submit" name="action" value="suspend" class="dropdown-link">Suspend User</button>
+                                                    </form>
+                                                <?php else: ?>
+                                                    <form action="process_user.php" method="post">
+                                                        <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
+                                                        <button type="submit" name="action" value="activate" class="dropdown-link">Activate User</button>
+                                                    </form>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             <?php else: ?>
                 <p>No users found.</p>
             <?php endif; ?>
         </section>
         
-        <section class="tab-content" id="items-tab">
+        <section class="tab-content <?= ($_GET['tab'] ?? '') === 'items' ? 'active' : '' ?>" id="items-tab">
             <div class="admin-section-header">
                 <h2>Coffee Auctions</h2>
-                <button id="add-item-btn" class="btn btn-primary">Add New Item</button>
+                <button id="add-item-btn" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add New Item
+                </button>
             </div>
             
             <div id="add-item-form" class="form-card" style="display: none;">
@@ -181,7 +216,7 @@ $currentDateTime = date('Y-m-d\TH:i');
                     <div class="form-group">
                         <label for="bid-end-date">Bid End Date/Time</label>
                         <input type="datetime-local" id="bid-end-date" name="bid_end_date" 
-                               class="form-control" min="<?php echo $currentDateTime; ?>" required>
+                               class="form-control" min="<?= $currentDateTime ?>" required>
                         <small>Set the date and time when bidding will close</small>
                     </div>
                     
@@ -210,81 +245,83 @@ $currentDateTime = date('Y-m-d\TH:i');
                 </form>
             </div>
             
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Price</th>
-                        <th>Type</th>
-                        <th>Status</th>
-                        <th>End Date</th>
-                        <th>Inventory</th>
-                        <th>Image</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $stmt = $pdo->query("SELECT * FROM items ORDER BY bid_end_date ASC");
-                    while ($item = $stmt->fetch()): 
-                        $now = new DateTime();
-                        $end_date = new DateTime($item['bid_end_date']);
-                        $is_active = $end_date > $now;
-                        $status_class = $is_active ? 'status-active' : 'status-ended';
-                    ?>
-                        <tr class="<?php echo !$is_active ? 'auction-ended' : ''; ?>">
-                            <td><?php echo $item['id']; ?></td>
-                            <td><?php echo htmlspecialchars($item['name']); ?></td>
-                            <td>$<?php echo number_format($item['starting_price'], 2); ?></td>
-                            <td>
-                                <?php if ($item['is_limited']): ?>
-                                    <span class="limited-badge">Limited</span>
-                                <?php else: ?>
-                                    <span class="unlimited-badge">Unlimited</span>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <span class="status-badge <?php echo $status_class; ?>">
-                                    <?php echo $is_active ? 'Active' : 'Ended'; ?>
-                                </span>
-                            </td>
-                            <td>
-                                <?php echo $end_date->format('M j, Y H:i'); ?>
-                                <?php if ($is_active): ?>
-                                    <div class="time-remaining">
-                                        (<?php 
-                                        $interval = $now->diff($end_date);
-                                        echo $interval->format('%a days %h hours %i minutes left');
-                                        ?>)
-                                    </div>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?php if ($item['is_limited']): ?>
-                                    <?php echo ($item['quantity'] - $item['items_sold']) . ' / ' . $item['quantity']; ?>
-                                <?php else: ?>
-                                    -
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <img src="images/<?php echo htmlspecialchars($item['image']); ?>" 
-                                     alt="<?php echo htmlspecialchars($item['name']); ?>" 
-                                     class="item-thumbnail">
-                            </td>
-                            <td>
-                                <a href="admin.php?edit_item=<?php echo $item['id']; ?>#items-tab" 
-                                   class="btn btn-outline btn-small">Edit</a>
-                                <form action="process_item.php" method="post" class="inline-form">
-                                    <input type="hidden" name="item_id" value="<?php echo $item['id']; ?>">
-                                    <button type="submit" name="action" value="delete" 
-                                            class="btn btn-error btn-small">Delete</button>
-                                </form>
-                            </td>
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>End Date</th>
+                            <th>Inventory</th>
+                            <th>Image</th>
+                            <th>Actions</th>
                         </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $stmt = $pdo->query("SELECT * FROM items ORDER BY bid_end_date ASC");
+                        while ($item = $stmt->fetch()): 
+                            $now = new DateTime();
+                            $end_date = new DateTime($item['bid_end_date']);
+                            $is_active = $end_date > $now;
+                            $status_class = $is_active ? 'status-active' : 'status-ended';
+                        ?>
+                            <tr class="<?= !$is_active ? 'auction-ended' : '' ?>">
+                                <td><?= $item['id'] ?></td>
+                                <td><?= htmlspecialchars($item['name']) ?></td>
+                                <td>₱<?= number_format($item['starting_price'], 2) ?></td>
+                                <td>
+                                    <?php if ($item['is_limited']): ?>
+                                        <span class="limited-badge">Limited</span>
+                                    <?php else: ?>
+                                        <span class="unlimited-badge">Unlimited</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <span class="status-badge <?= $status_class ?>">
+                                        <?= $is_active ? 'Active' : 'Ended' ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <?= $end_date->format('M j, Y H:i') ?>
+                                    <?php if ($is_active): ?>
+                                        <div class="time-remaining">
+                                            (<?php 
+                                            $interval = $now->diff($end_date);
+                                            echo $interval->format('%a days %h hours %i minutes left');
+                                            ?>)
+                                        </div>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($item['is_limited']): ?>
+                                        <?= ($item['quantity'] - $item['items_sold']) . ' / ' . $item['quantity'] ?>
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <img src="images/<?= htmlspecialchars($item['image']) ?>" 
+                                         alt="<?= htmlspecialchars($item['name']) ?>" 
+                                         class="item-thumbnail">
+                                </td>
+                                <td>
+                                    <a href="admin.php?edit_item=<?= $item['id'] ?>#items-tab" 
+                                       class="btn btn-outline btn-small">Edit</a>
+                                    <form action="process_item.php" method="post" class="inline-form">
+                                        <input type="hidden" name="item_id" value="<?= $item['id'] ?>">
+                                        <button type="submit" name="action" value="delete" 
+                                                class="btn btn-error btn-small">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
+            </div>
         </section>
     </main>
 
@@ -318,6 +355,20 @@ $currentDateTime = date('Y-m-d\TH:i');
 
     <script>
         // Tab functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Activate tab from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeTab = urlParams.get('tab') || 'users';
+            
+            // Activate the requested tab
+            document.querySelector(`.tab-btn[data-tab="${activeTab}"]`).click();
+            
+            // Show search form if coming from search
+            if (activeTab === 'users' && urlParams.has('search')) {
+                document.getElementById('search-users-form').style.display = 'block';
+            }
+        });
+        
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 // Remove active class from all buttons and tabs
@@ -328,6 +379,11 @@ $currentDateTime = date('Y-m-d\TH:i');
                 btn.classList.add('active');
                 const tabId = btn.getAttribute('data-tab') + '-tab';
                 document.getElementById(tabId).classList.add('active');
+                
+                // Update URL without reload
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.set('tab', btn.getAttribute('data-tab'));
+                window.history.pushState({}, '', newUrl);
             });
         });
         
@@ -360,15 +416,28 @@ $currentDateTime = date('Y-m-d\TH:i');
             endDateInput.min = minDate;
         }
         
-        // Activate tab from URL hash
-        window.addEventListener('load', function() {
-            const hash = window.location.hash;
-            if (hash) {
-                const tabId = hash.replace('#', '');
-                const tabBtn = document.querySelector(`.tab-btn[data-tab="${tabId.replace('-tab', '')}"]`);
-                if (tabBtn) {
-                    tabBtn.click();
-                }
+        // Toggle search form
+        document.getElementById('search-users-btn').addEventListener('click', function() {
+            const form = document.getElementById('search-users-form');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        });
+        
+        // Password modal
+        function openPasswordModal(userId, userName) {
+            document.getElementById('modalUserId').value = userId;
+            document.getElementById('userName').textContent = userName;
+            document.getElementById('passwordModal').style.display = 'block';
+        }
+        
+        // Close modal when clicking X
+        document.querySelector('.close').addEventListener('click', function() {
+            document.getElementById('passwordModal').style.display = 'none';
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('passwordModal')) {
+                document.getElementById('passwordModal').style.display = 'none';
             }
         });
     </script>
