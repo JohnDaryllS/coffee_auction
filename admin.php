@@ -44,20 +44,132 @@ $currentDateTime = date('Y-m-d\TH:i');
         }
         
         .admin-table th, .admin-table td {
-            padding: 1rem;
+            padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid #ddd;
+            vertical-align: middle; /* Ensure vertical alignment */
         }
         
         .admin-table th {
-            background-color: var(--light-color);
+            background-color: #f5f5f5;
             font-weight: 600;
+            color: #333;
         }
         
         .admin-table tr:hover {
-            background-color: rgba(111, 78, 55, 0.05);
+            background-color: rgba(0, 0, 0, 0.02);
         }
         
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .btn-outline {
+            border: 1px solid #ddd;
+            color: #333;
+            background-color: white;
+        }
+        
+        .btn-outline:hover {
+            background-color: #f5f5f5;
+            border-color: #ccc;
+        }
+        
+        .btn-error {
+            background-color: #f44336;
+            color: white;
+            border: 1px solid #d32f2f;
+        }
+        
+        .btn-error:hover {
+            background-color: #d32f2f;
+        }
+        
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 0.75rem;
+        }
+        
+        /* Status Badges */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            display: inline-block;
+        }
+        
+        .status-active {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .status-ended {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        /* Badge Styles */
+        .limited-badge {
+            background-color: #fff3e0;
+            color: #e65100;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            display: inline-block;
+        }
+        
+        .unlimited-badge {
+            background-color: #e3f2fd;
+            color: #1565c0;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            display: inline-block;
+        }
+        
+        /* Time Remaining */
+        .time-remaining {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        /* Item Thumbnail */
+        .item-thumbnail {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+        
+        .auction-ended {
+            opacity: 0.8;
+            background-color: #f8f9fa;
+        }
+        
+        .auction-ended td {
+            color: #6c757d;
+        }
+        
+        /* Form Styles */
         .form-card {
             background-color: white;
             border-radius: 8px;
@@ -73,55 +185,22 @@ $currentDateTime = date('Y-m-d\TH:i');
             margin-top: 1.5rem;
         }
         
-        .item-thumbnail {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-        
-        .limited-badge {
-            background-color: #ffc107;
-            color: #000;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            display: inline-block;
-        }
-        
-        .unlimited-badge {
-            background-color: #17a2b8;
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            display: inline-block;
-        }
-        
-        .status-active {
-            color: var(--success-color);
-            font-weight: bold;
-        }
-        
-        .status-ended {
-            color: var(--error-color);
-            font-weight: bold;
-        }
-        
-        .time-remaining {
-            font-size: 0.9rem;
-            color: #666;
-        }
-        
-        .auction-ended {
-            opacity: 0.7;
-            background-color: #f8f9fa;
-        }
-        
-        .auction-ended td {
-            color: #6c757d;
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .admin-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 8px;
+            }
         }
     </style>
 </head>
@@ -392,10 +471,7 @@ $currentDateTime = date('Y-m-d\TH:i');
                                     <?= $end_date->format('M j, Y H:i') ?>
                                     <?php if ($is_active): ?>
                                         <div class="time-remaining">
-                                            (<?php 
-                                            $interval = $now->diff($end_date);
-                                            echo $interval->format('%a days %h hours %i minutes left');
-                                            ?>)
+                                            (<?= $now->diff($end_date)->format('%a days %h hours %i minutes left') ?>)
                                         </div>
                                     <?php endif; ?>
                                 </td>
@@ -412,13 +488,32 @@ $currentDateTime = date('Y-m-d\TH:i');
                                          class="item-thumbnail">
                                 </td>
                                 <td>
-                                    <a href="product_view.php?id=<?= $item['id'] ?>&admin=1" class="btn btn-outline btn-small">View</a>
-                                    <button onclick="setupEditItem(<?= $item['id'] ?>)" class="btn btn-outline btn-small">Edit</button>
-                                    <form action="process_item.php" method="post" class="inline-form">
-                                        <input type="hidden" name="item_id" value="<?= $item['id'] ?>">
-                                        <button type="submit" name="action" value="delete" 
-                                                class="btn btn-error btn-small">Delete</button>
-                                    </form>
+                                    <div class="action-buttons">
+                                        <a href="product_view.php?id=<?= $item['id'] ?>&admin=1" 
+                                           class="btn btn-outline btn-small" 
+                                           title="View">
+                                            <i class="fas fa-eye"></i>
+                                            <span class="action-text">View</span>
+                                        </a>
+                                        <button onclick="setupEditItem(<?= $item['id'] ?>)" 
+                                                class="btn btn-outline btn-small" 
+                                                title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                            <span class="action-text">Edit</span>
+                                        </button>
+                                        <form action="process_item.php" method="post" class="inline-form">
+                                            <input type="hidden" name="item_id" value="<?= $item['id'] ?>">
+                                            <button type="submit" 
+                                                    name="action" 
+                                                    value="delete" 
+                                                    class="btn btn-error btn-small" 
+                                                    title="Delete"
+                                                    onclick="return confirm('Are you sure you want to delete this item?')">
+                                                <i class="fas fa-trash-alt"></i>
+                                                <span class="action-text">Delete</span>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endwhile; ?>
