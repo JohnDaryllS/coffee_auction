@@ -13,7 +13,7 @@
     <nav class="navbar">
         <div class="navbar-left">
             <div class="logo">
-                <span class="logo-icon">☕</span>
+                <img src="images/crop.png" alt="Coffee-Auction" style="width:50px;">
                 <span class="logo-text">Coffee Auction</span>
             </div>
         </div>
