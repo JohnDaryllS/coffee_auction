@@ -11,337 +11,397 @@
 </head>
 <style>
     /* Modern About Page Styles */
-.about-hero {
-    position: relative;
-    height: 80vh;
-    overflow: hidden;
-}
+    .about-hero {
+        position: relative;
+        height: 80vh;
+        min-height: 600px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+    }
 
-.hero-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
-    z-index: 1;
-    animation: zoomIn 20s infinite alternate;
-}
+    .hero-video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 1;
+    }
 
-@keyframes zoomIn {
-    from { transform: scale(1); }
-    to { transform: scale(1.1); }
-}
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+        z-index: 2;
+    }
 
-.hero-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
-    z-index: 2;
-}
+    .hero-content {
+        position: relative;
+        z-index: 3;
+        color: white;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 5%;
+    }
 
-.hero-content {
-    position: relative;
-    z-index: 3;
-    color: white;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 0 10%;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.hero-content h1 {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    line-height: 1.2;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-}
-
-.hero-content p {
-    font-size: 1.5rem;
-    max-width: 600px;
-    margin-bottom: 2rem;
-}
-
-.scroll-down {
-    position: absolute;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: white;
-    font-size: 2rem;
-    animation: bounce 2s infinite;
-}
-
-@keyframes bounce {
-    0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
-    40% { transform: translateY(-20px) translateX(-50%); }
-    60% { transform: translateY(-10px) translateX(-50%); }
-}
-
-/* Section Styles */
-.about-story, .about-team, .about-cta {
-    padding: 6rem 0;
-}
-
-.section-header {
-    text-align: center;
-    margin-bottom: 3rem;
-}
-
-.section-subtitle {
-    display: block;
-    color: var(--primary-color);
-    font-weight: 600;
-    letter-spacing: 2px;
-    margin-bottom: 1rem;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-}
-
-.section-title {
-    font-size: 2.5rem;
-    margin-bottom: 1.5rem;
-    position: relative;
-    display: inline-block;
-}
-
-.divider {
-    width: 80px;
-    height: 3px;
-    background-color: var(--secondary-color);
-    margin: 0 auto;
-}
-
-/* Timeline */
-.story-timeline {
-    position: relative;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem 0;
-}
-
-.story-timeline::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 2px;
-    height: 100%;
-    background-color: var(--accent-color);
-}
-
-.timeline-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 3rem;
-    position: relative;
-}
-
-.timeline-year {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background-color: var(--primary-color);
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.5rem;
-    font-weight: 600;
-    z-index: 2;
-    box-shadow: 0 10px 20px rgba(111, 78, 55, 0.2);
-}
-
-.timeline-content {
-    width: calc(50% - 100px);
-    padding: 2rem;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-    position: relative;
-}
-
-.timeline-content::before {
-    content: '';
-    position: absolute;
-    top: 30px;
-    width: 20px;
-    height: 20px;
-    background: white;
-    transform: rotate(45deg);
-}
-
-.timeline-item:nth-child(odd) .timeline-content {
-    margin-left: auto;
-}
-
-.timeline-item:nth-child(odd) .timeline-content::before {
-    right: -10px;
-}
-
-.timeline-item:nth-child(even) .timeline-content {
-    text-align: right;
-}
-
-.timeline-item:nth-child(even) .timeline-content::before {
-    left: -10px;
-}
-
-/* Stats Section */
-.about-stats {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 4rem 0;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 2rem;
-    text-align: center;
-}
-
-.stat-item {
-    padding: 2rem;
-}
-
-.stat-number {
-    font-size: 3.5rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-}
-
-.stat-label {
-    font-size: 1.1rem;
-    opacity: 0.9;
-}
-
-/* Team Section */
-.team-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
-}
-
-.team-member {
-    text-align: center;
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.team-member:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-}
-
-.member-photo {
-    height: 300px;
-    background-size: cover;
-    background-position: center;
-    position: relative;
-}
-
-.social-links {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    padding: 1rem;
-    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.team-member:hover .social-links {
-    opacity: 1;
-}
-
-.social-links a {
-    color: white;
-    margin: 0 0.5rem;
-    font-size: 1.2rem;
-}
-
-.team-member h3 {
-    margin: 1.5rem 0 0.5rem;
-    font-size: 1.5rem;
-}
-
-.position {
-    color: var(--primary-color);
-    font-weight: 600;
-    margin-bottom: 1rem;
-}
-
-.bio {
-    padding: 0 1.5rem 1.5rem;
-    color: #666;
-}
-
-/* CTA Section */
-.about-cta {
-    text-align: center;
-    background-color: var(--light-color);
-}
-
-.about-cta h2 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-}
-
-.about-cta p {
-    font-size: 1.2rem;
-    max-width: 600px;
-    margin: 0 auto 2rem;
-    color: #666;
-}
-
-/* Responsive Styles */
-@media (max-width: 768px) {
     .hero-content h1 {
+        font-size: 3.5rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.2;
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+        animation: fadeInUp 1s ease;
+    }
+
+    .hero-content p {
+        font-size: 1.3rem;
+        max-width: 600px;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+        animation: fadeInUp 1s ease 0.3s forwards;
+        opacity: 0;
+    }
+
+    .hero-btn {
+        animation: fadeInUp 1s ease 0.6s forwards;
+        opacity: 0;
+    }
+
+    /* Mission Section */
+    .mission-section {
+        padding: 6rem 0;
+        background-color: #f9f5f0;
+    }
+
+    .mission-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        align-items: center;
+        padding: 0 5%;
+    }
+
+    .mission-image {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        transform: perspective(1000px) rotateY(-5deg);
+        transition: transform 0.5s ease;
+    }
+
+    .mission-image:hover {
+        transform: perspective(1000px) rotateY(0deg);
+    }
+
+    .mission-image img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .mission-content h2 {
         font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        position: relative;
     }
-    
-    .story-timeline::before {
-        left: 60px;
-    }
-    
-    .timeline-item {
-        flex-direction: column;
-    }
-    
-    .timeline-year {
+
+    .mission-content h2::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
         width: 80px;
-        height: 80px;
+        height: 4px;
+        background-color: var(--secondary-color);
+    }
+
+    .mission-content p {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #555;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Values Section */
+    .values-section {
+        padding: 6rem 0;
+        background-color: white;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 4rem;
+    }
+
+    .section-header h2 {
+        font-size: 2.5rem;
+        color: var(--primary-color);
         margin-bottom: 1rem;
     }
-    
-    .timeline-content {
-        width: calc(100% - 100px);
-        margin-left: 100px !important;
-        text-align: left !important;
+
+    .section-header p {
+        max-width: 700px;
+        margin: 0 auto;
+        color: #666;
     }
-    
-    .timeline-content::before {
-        left: -10px !important;
-        right: auto !important;
-        top: -10px;
-        transform: rotate(45deg);
+
+    .values-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 5%;
     }
-}
+
+    .value-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        text-align: center;
+    }
+
+    .value-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    }
+
+    .value-icon {
+        width: 80px;
+        height: 80px;
+        background-color: var(--accent-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2rem;
+        color: var(--primary-color);
+    }
+
+    .value-card h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+    }
+
+    /* Team Section */
+    .team-section {
+        padding: 6rem 0;
+        background-color: #f9f5f0;
+    }
+
+    .team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 5%;
+    }
+
+    .team-member {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .team-member:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    }
+
+    .member-photo {
+        height: 350px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+    }
+
+    .social-links {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: 1.5rem;
+        background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .team-member:hover .social-links {
+        opacity: 1;
+    }
+
+    .social-links a {
+        color: white;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .social-links a:hover {
+        background-color: var(--primary-color);
+        transform: translateY(-3px);
+    }
+
+    .member-info {
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .member-info h3 {
+        font-size: 1.3rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .position {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    /* Stats Section */
+    .stats-section {
+        padding: 4rem 0;
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 5%;
+        text-align: center;
+    }
+
+    .stat-item {
+        padding: 2rem;
+    }
+
+    .stat-number {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    /* CTA Section */
+    .cta-section {
+        padding: 6rem 0;
+        background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('images/coffee-beans-bg.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        color: white;
+        text-align: center;
+    }
+
+    .cta-content {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 5%;
+    }
+
+    .cta-content h2 {
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .cta-content p {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 992px) {
+        .mission-container {
+            grid-template-columns: 1fr;
+            gap: 3rem;
+        }
+        
+        .mission-image {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .hero-content h1 {
+            font-size: 2.8rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-content h1 {
+            font-size: 2.3rem;
+        }
+        
+        .hero-content p {
+            font-size: 1.1rem;
+        }
+        
+        .mission-content h2 {
+            font-size: 2rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .about-hero {
+            height: 70vh;
+            min-height: 500px;
+        }
+        
+        .hero-content h1 {
+            font-size: 2rem;
+        }
+        
+        .section-header h2 {
+            font-size: 2rem;
+        }
+        
+        .value-card {
+            padding: 2rem;
+        }
+    }
 </style>
 <body>
     <nav class="navbar">
@@ -367,151 +427,225 @@
         </div>
     </nav>
 
-    <main class="about-container">
-        <!-- Hero Section -->
+    <main>
+        <!-- Hero Section with Video Background -->
         <section class="about-hero">
-            <div class="hero-content">
-                <h1>More Than Just Coffee</h1>
-                <p>We're revolutionizing how specialty coffee reaches enthusiasts worldwide</p>
-                <div class="scroll-down">
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-            </div>
+            <video autoplay muted loop class="hero-video">
+                <source src="videos/coffee-beans.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
             <div class="hero-overlay"></div>
-            <div class="hero-image" style="background-image: url('images/21.jpg');"></div>
+            <div class="hero-content">
+                <h1>Revolutionizing Coffee Trade</h1>
+                <p>We connect specialty coffee growers directly with enthusiasts worldwide through our transparent auction platform.</p>
+                <a href="auction.php" class="btn btn-primary hero-btn">Explore Auctions</a>
+            </div>
         </section>
 
-        <!-- Story Section -->
-        <section class="about-story">
-            <div class="container">
-                <div class="section-header">
-                    <span class="section-subtitle">Our Journey</span>
-                    <h2 class="section-title">From Bean to Cup</h2>
-                    <div class="divider"></div>
+        <!-- Mission Section -->
+        <section class="mission-section">
+            <div class="mission-container">
+                <div class="mission-image">
+                    <img src="images/Untitled-1.jpg" alt="Coffee Farmer">
                 </div>
-                
-                <div class="story-timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-year">2018</div>
-                        <div class="timeline-content">
-                            <h3>Founded in Portland</h3>
-                            <p>Started as a small group of coffee enthusiasts wanting to connect farmers directly with consumers</p>
+                <div class="mission-content">
+                    <h2>Our Mission</h2>
+                    <p>At Coffee Auction, we're committed to creating a fair and transparent marketplace that benefits both coffee growers and buyers. Our platform eliminates middlemen, ensuring farmers receive fair compensation for their exceptional crops while buyers get access to the finest specialty coffees.</p>
+                    <p>We believe in sustainable practices, direct relationships, and celebrating the hard work that goes into every bean. By connecting growers directly with roasters and enthusiasts, we're changing the way specialty coffee is traded.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Values Section -->
+        <section class="values-section">
+            <div class="section-header">
+                <h2>Our Core Values</h2>
+                <p>These principles guide everything we do at Coffee Auction</p>
+            </div>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3>Transparency</h3>
+                    <p>Full visibility into pricing, origins, and transactions for all participants in the supply chain.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h3>Sustainability</h3>
+                    <p>Promoting environmentally friendly farming practices and long-term relationships.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <h3>Fairness</h3>
+                    <p>Ensuring equitable compensation for farmers and fair prices for buyers.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3>Quality</h3>
+                    <p>Focusing exclusively on specialty grade coffees with cupping scores of 85+.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Team Section -->
+        <section class="team-section">
+            <div class="section-header">
+                <h2>Meet Our Team</h2>
+                <p>The passionate individuals behind Coffee Auction</p>
+            </div>
+            <div class="team-grid">
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('images/23.jpg');">
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fas fa-envelope"></i></a>
                         </div>
                     </div>
-                    <div class="timeline-item">
-                        <div class="timeline-year">2020</div>
-                        <div class="timeline-content">
-                            <h3>First Online Auction</h3>
-                            <p>Launched our digital platform featuring rare lots from Ethiopia and Colombia</p>
+                    <div class="member-info">
+                        <h3>Alex Johnson</h3>
+                        <span class="position">Founder & CEO</span>
+                        <p>Former Q-grader with 15 years in specialty coffee industry</p>
+                    </div>
+                </div>
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('images/24.jfif');">
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                            <a href="#"><i class="fas fa-envelope"></i></a>
                         </div>
                     </div>
-                    <div class="timeline-item">
-                        <div class="timeline-year">2023</div>
-                        <div class="timeline-content">
-                            <h3>Global Reach</h3>
-                            <p>Now working with over 200 specialty farms across 15 countries</p>
+                    <div class="member-info">
+                        <h3>Maria Garcia</h3>
+                        <span class="position">Head of Sourcing</span>
+                        <p>Direct relationships with farms across Latin America</p>
+                    </div>
+                </div>
+                <div class="team-member">
+                    <div class="member-photo" style="background-image: url('images/25.jfif');">
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-github"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fas fa-envelope"></i></a>
                         </div>
+                    </div>
+                    <div class="member-info">
+                        <h3>Jamie Smith</h3>
+                        <span class="position">Tech Lead</span>
+                        <p>Building seamless auction experiences</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Stats Section -->
-        <section class="about-stats">
-            <div class="container">
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-number" data-count="200">0</div>
-                        <div class="stat-label">Farms Connected</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" data-count="1500">0</div>
-                        <div class="stat-label">Auctions Completed</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" data-count="98">0</div>
-                        <div class="stat-label">Customer Satisfaction</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" data-count="15">0</div>
-                        <div class="stat-label">Countries Served</div>
-                    </div>
+        <!-- <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number" data-count="200">0</div>
+                    <div class="stat-label">Farms Connected</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" data-count="1500">0</div>
+                    <div class="stat-label">Auctions Completed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" data-count="98">0</div>
+                    <div class="stat-label">Customer Satisfaction</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" data-count="15">0</div>
+                    <div class="stat-label">Countries Served</div>
                 </div>
             </div>
-        </section>
+        </section> -->
 
-        <!-- Team Section -->
-        <section class="about-team">
-            <div class="container">
-                <div class="section-header">
-                    <span class="section-subtitle">Meet The Team</span>
-                    <h2 class="section-title">Coffee Passionates</h2>
-                    <div class="divider"></div>
-                </div>
-                
-                <div class="team-grid">
-                    <div class="team-member">
-                        <div class="member-photo" style="background-image: url('images/23.jpg');">
-                            <div class="social-links">
-                                <a href="#"><i class="fab fa-linkedin"></i></a>
-                                <a href="#"><i class="fab fa-twitter"></i></a>
-                            </div>
-                        </div>
-                        <h3>Alex Johnson</h3>
-                        <p class="position">Founder & CEO</p>
-                        <p class="bio">Former Q-grader with 15 years in specialty coffee industry</p>
+    <!-- Modern Footer -->
+    <footer class="modern-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-column">
+                    <div class="footer-logo">
+                        <img src="images/crop.png" alt="Coffee Auction" class="logo-img">
+                        <span class="logo-text">Coffee Auction</span>
                     </div>
-                    <div class="team-member">
-                        <div class="member-photo" style="background-image: url('images/24.jfif');">
-                            <div class="social-links">
-                                <a href="#"><i class="fab fa-linkedin"></i></a>
-                                <a href="#"><i class="fab fa-instagram"></i></a>
-                            </div>
-                        </div>
-                        <h3>Maria Garcia</h3>
-                        <p class="position">Head of Sourcing</p>
-                        <p class="bio">Direct relationships with farms across Latin America</p>
-                    </div>
-                    <div class="team-member">
-                        <div class="member-photo" style="background-image: url('images/25.jfif');">
-                            <div class="social-links">
-                                <a href="#"><i class="fab fa-github"></i></a>
-                                <a href="#"><i class="fab fa-twitter"></i></a>
-                            </div>
-                        </div>
-                        <h3>Jamie Smith</h3>
-                        <p class="position">Tech Lead</p>
-                        <p class="bio">Building seamless auction experiences</p>
+                    <p class="footer-about">
+                        Revolutionizing how specialty coffee reaches enthusiasts worldwide. 
+                        Connecting farmers directly with coffee lovers through our unique auction platform.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- CTA Section -->
-        <section class="about-cta">
-            <div class="container">
-                <h2>Ready to Experience Premium Coffee?</h2>
-                <p>Join our community of coffee enthusiasts and discover rare beans from around the world</p>
-                <a href="register.php" class="btn btn-primary">Get Started</a>
-            </div>
-        </section>
-    </main>
+                <div class="footer-column">
+                    <h3 class="footer-title">Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.php">Home</a></li>
+                        <li><a href="auction.php">Current Auctions</a></li>
+                        <li><a href="about.php">Our Story</a></li>
+                        <li><a href="#">How It Works</a></li>
+                        <li><a href="#">Coffee Guides</a></li>
+                    </ul>
+                </div>
 
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-logo">
-                <img src="images/crop.png" alt="Coffee-Auction" style="width:50px;">
-                <span class="logo-text">Coffee Auction</span>
+                <div class="footer-column">
+                    <h3 class="footer-title">Contact Us</h3>
+                    <ul class="contact-info">
+                        <li class="contact-item">
+                            <i class="fas fa-map-marker-alt contact-icon"></i>
+                            <span>123 Coffee Street, Portland, OR 97205</span>
+                        </li>
+                        <li class="contact-item">
+                            <i class="fas fa-phone-alt contact-icon"></i>
+                            <span>+1 (503) 555-0199</span>
+                        </li>
+                        <li class="contact-item">
+                            <i class="fas fa-envelope contact-icon"></i>
+                            <span>info@coffeeauction.com</span>
+                        </li>
+                        <li class="contact-item">
+                            <i class="fas fa-clock contact-icon"></i>
+                            <span>Mon-Fri: 9AM - 5PM</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h3 class="footer-title">Newsletter</h3>
+                    <p class="newsletter-text">
+                        Subscribe to get updates on new auctions, coffee tips, and exclusive offers.
+                    </p>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="Your email address" required>
+                        <button type="submit" class="subscribe-btn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
             </div>
-            <div class="footer-links">
-                <a href="about.php">About Us</a>
-                <a href="#">Terms</a>
-                <a href="#">Privacy</a>
-                <a href="#">Contact</a>
+
+            <div class="footer-bottom">
+                <div class="copyright">
+                    &copy; <?php echo date('Y'); ?> Coffee Auction. All rights reserved.
+                </div>
+                <div class="legal-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Cookie Policy</a>
+                </div>
             </div>
-        </div>
-        <div class="footer-copyright">
-            &copy; <?php echo date('Y'); ?> Coffee Auction. All rights reserved.
         </div>
     </footer>
 
@@ -536,16 +670,19 @@
         }
         
         // Trigger animation when stats section is in view
-        window.addEventListener('scroll', function() {
-            const statsSection = document.querySelector('.about-stats');
-            const position = statsSection.getBoundingClientRect().top;
-            const screenPosition = window.innerHeight / 1.3;
-            
-            if (position < screenPosition) {
-                animateStats();
-                window.removeEventListener('scroll', this);
-            }
-        });
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateStats();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        const statsSection = document.querySelector('.stats-section');
+        if (statsSection) {
+            observer.observe(statsSection);
+        }
     </script>
 </body>
 </html>

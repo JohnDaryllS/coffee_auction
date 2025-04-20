@@ -66,12 +66,27 @@ $highlight_item = isset($_GET['new_item']) ? (int)$_GET['new_item'] : 0;
 
 /* Auction Card Styles */
 .auction-card {
-    background-color: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
+        position: relative; /* Add this to make absolute positioning work */
+        background-color: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
 }
+
+.limited-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background-color: rgba(255, 193, 7, 0.95); /* Slightly transparent */
+        color: #000;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        z-index: 2; /* Ensure it stays above the image */
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
 
 .auction-card.ended {
     opacity: 0.8;
@@ -89,9 +104,11 @@ $highlight_item = isset($_GET['new_item']) ? (int)$_GET['new_item'] : 0;
 }
 
 .auction-image {
-    height: 180px;
-    background-size: cover;
-    background-position: center;
+        position: relative; /* Add this for proper z-index stacking */
+        height: 180px;
+        background-size: cover;
+        background-position: center;
+        z-index: 1; /* Below the badge */
 }
 
 .auction-details {
@@ -295,21 +312,89 @@ $highlight_item = isset($_GET['new_item']) ? (int)$_GET['new_item'] : 0;
         </div>
     </main>
 
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-logo">
-                <img src="images/crop.png" alt="Coffee-Auction" style="width:50px;">
-                <span class="logo-text">Coffee Auction</span>
+    <footer class="modern-footer">
+        <div class="footer-container">
+            <!-- Footer Columns -->
+            <div class="footer-grid">
+                <!-- About Column -->
+                <div class="footer-column">
+                    <div class="footer-logo">
+                        <img src="images/crop.png" alt="Coffee Auction" class="logo-img">
+                        <span class="logo-texts">Coffee Auction</span>
+                    </div>
+                    <p class="footer-about">
+                        Revolutionizing how specialty coffee reaches enthusiasts worldwide. 
+                        Connecting farmers directly with coffee lovers through our unique auction platform.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links Column -->
+                <div class="footer-column">
+                    <h3 class="footer-title">Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.php">Home</a></li>
+                        <li><a href="auction.php">Current Auctions</a></li>
+                        <li><a href="about.php">Our Story</a></li>
+                        <li><a href="#">How It Works</a></li>
+                        <li><a href="#">Coffee Guides</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Column -->
+                <div class="footer-column">
+                    <h3 class="footer-title">Contact Us</h3>
+                    <ul class="contact-info">
+                        <li class="contact-item">
+                            <i class="fas fa-map-marker-alt contact-icon"></i>
+                            <span>123 Coffee Street, Portland, OR 97205</span>
+                        </li>
+                        <li class="contact-item">
+                            <i class="fas fa-phone-alt contact-icon"></i>
+                            <span>+1 (503) 555-0199</span>
+                        </li>
+                        <li class="contact-item">
+                            <i class="fas fa-envelope contact-icon"></i>
+                            <span>info@coffeeauction.com</span>
+                        </li>
+                        <li class="contact-item">
+                            <i class="fas fa-clock contact-icon"></i>
+                            <span>Mon-Fri: 9AM - 5PM</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter Column -->
+                <div class="footer-column">
+                    <h3 class="footer-title">Newsletter</h3>
+                    <p class="newsletter-text">
+                        Subscribe to get updates on new auctions, coffee tips, and exclusive offers.
+                    </p>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="Your email address" required>
+                        <button type="submit" class="subscribe-btn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
             </div>
-            <div class="footer-links">
-                <a href="about.php">About Us</a>
-                <a href="#">Terms</a>
-                <a href="#">Privacy</a>
-                <a href="#">Contact</a>
+
+            <!-- Footer Bottom -->
+            <div class="footer-bottom">
+                <div class="copyright">
+                    &copy; <?php echo date('Y'); ?> Coffee Auction. All rights reserved.
+                </div>
+                <div class="legal-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Cookie Policy</a>
+                </div>
             </div>
-        </div>
-        <div class="footer-copyright">
-            &copy; <?php echo date('Y'); ?> Coffee Auction. All rights reserved.
         </div>
     </footer>
 

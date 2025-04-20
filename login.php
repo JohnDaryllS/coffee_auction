@@ -7,6 +7,7 @@
     <title>Login - Coffee Auction</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <nav class="navbar">
@@ -68,22 +69,90 @@
         </div>
     </main>
 
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-logo">
-                <span class="logo-icon">☕</span>
-                <span class="logo-text">Coffee Auction</span>
+    <footer class="modern-footer">
+    <div class="footer-container">
+        <!-- Footer Columns -->
+        <div class="footer-grid">
+            <!-- About Column -->
+            <div class="footer-column">
+                <div class="footer-logo">
+                    <img src="images/crop.png" alt="Coffee Auction" class="logo-img">
+                    <span class="logo-texts">Coffee Auction</span>
+                </div>
+                <p class="footer-about">
+                    Revolutionizing how specialty coffee reaches enthusiasts worldwide. 
+                    Connecting farmers directly with coffee lovers through our unique auction platform.
+                </p>
+                <div class="social-links">
+                    <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                </div>
             </div>
-            <div class="footer-links">
-                <a href="#">About Us</a>
-                <a href="#">Terms</a>
-                <a href="#">Privacy</a>
-                <a href="#">Contact</a>
+
+            <!-- Quick Links Column -->
+            <div class="footer-column">
+                <h3 class="footer-title">Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="index.php">Home</a></li>
+                    <li><a href="auction.php">Current Auctions</a></li>
+                    <li><a href="about.php">Our Story</a></li>
+                    <li><a href="#">How It Works</a></li>
+                    <li><a href="#">Coffee Guides</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact Column -->
+            <div class="footer-column">
+                <h3 class="footer-title">Contact Us</h3>
+                <ul class="contact-info">
+                    <li class="contact-item">
+                        <i class="fas fa-map-marker-alt contact-icon"></i>
+                        <span>123 Coffee Street, Portland, OR 97205</span>
+                    </li>
+                    <li class="contact-item">
+                        <i class="fas fa-phone-alt contact-icon"></i>
+                        <span>+1 (503) 555-0199</span>
+                    </li>
+                    <li class="contact-item">
+                        <i class="fas fa-envelope contact-icon"></i>
+                        <span>info@coffeeauction.com</span>
+                    </li>
+                    <li class="contact-item">
+                        <i class="fas fa-clock contact-icon"></i>
+                        <span>Mon-Fri: 9AM - 5PM</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Newsletter Column -->
+            <div class="footer-column">
+                <h3 class="footer-title">Newsletter</h3>
+                <p class="newsletter-text">
+                    Subscribe to get updates on new auctions, coffee tips, and exclusive offers.
+                </p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Your email address" required>
+                    <button type="submit" class="subscribe-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
             </div>
         </div>
-        <div class="footer-copyright">
-            &copy; <?php echo date('Y'); ?> Coffee Auction. All rights reserved.
+
+        <!-- Footer Bottom -->
+        <div class="footer-bottom">
+            <div class="copyright">
+                &copy; <?php echo date('Y'); ?> Coffee Auction. All rights reserved.
+            </div>
+            <div class="legal-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Cookie Policy</a>
+            </div>
         </div>
-    </footer>
+    </div>
+</footer>
 </body>
 </html>
