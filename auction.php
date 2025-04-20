@@ -15,6 +15,7 @@ $highlight_item = isset($_GET['new_item']) ? (int)$_GET['new_item'] : 0;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $is_admin_view ? 'Admin Auction View' : 'Coffee Auctions'; ?> - Coffee Auction</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="images/crop.png" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
