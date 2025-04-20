@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // 6. Check minimum bid increment
         $min_increment = 0.50; // Minimum $0.50 increment
         if (($bid_amount - $current_bid) < $min_increment) {
-            throw new Exception('Minimum bid increment is $0.50');
+            throw new Exception('Minimum bid increment is ₱0.50');
         }
 
         // 7. Insert the bid

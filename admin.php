@@ -30,6 +30,99 @@ $currentDateTime = date('Y-m-d\TH:i');
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Additional Admin Styles */
+        .admin-container {
+            padding: 2rem 0;
+        }
+        
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .admin-table th, .admin-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .admin-table th {
+            background-color: var(--light-color);
+            font-weight: 600;
+        }
+        
+        .admin-table tr:hover {
+            background-color: rgba(111, 78, 55, 0.05);
+        }
+        
+        .form-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .item-thumbnail {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        
+        .limited-badge {
+            background-color: #ffc107;
+            color: #000;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .unlimited-badge {
+            background-color: #17a2b8;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .status-active {
+            color: var(--success-color);
+            font-weight: bold;
+        }
+        
+        .status-ended {
+            color: var(--error-color);
+            font-weight: bold;
+        }
+        
+        .time-remaining {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .auction-ended {
+            opacity: 0.7;
+            background-color: #f8f9fa;
+        }
+        
+        .auction-ended td {
+            color: #6c757d;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar admin-nav">
@@ -195,54 +288,63 @@ $currentDateTime = date('Y-m-d\TH:i');
                 </button>
             </div>
             
-            <div id="add-item-form" class="form-card" style="display: none;">
-                <h3>Add New Coffee Auction</h3>
-                <form action="process_item.php" method="post" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="item-name">Coffee Name</label>
-                        <input type="text" id="item-name" name="name" class="form-control" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="item-description">Description</label>
-                        <textarea id="item-description" name="description" class="form-control" rows="3" required></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="item-price">Starting Price (₱)</label>
-                        <input type="number" id="item-price" name="starting_price" class="form-control" min="0.01" step="0.01" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="bid-end-date">Bid End Date/Time</label>
-                        <input type="datetime-local" id="bid-end-date" name="bid_end_date" 
-                               class="form-control" min="<?= $currentDateTime ?>" required>
-                        <small>Set the date and time when bidding will close</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="is-limited" name="is_limited" value="1">
-                            This is a limited quantity item
-                        </label>
-                    </div>
-                    
-                    <div class="form-group" id="quantity-group" style="display: none;">
-                        <label for="item-quantity">Available Quantity</label>
-                        <input type="number" id="item-quantity" name="quantity" class="form-control" min="1" value="1">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="item-image">Image</label>
-                        <input type="file" id="item-image" name="image" class="form-control" accept="image/*" required>
-                        <small>Recommended size: 600x400 pixels</small>
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button type="button" id="cancel-add-item" class="btn btn-outline">Cancel</button>
-                        <button type="submit" name="action" value="add" class="btn btn-primary">Add Item</button>
-                    </div>
-                </form>
+            <!-- Add/Edit Form Container -->
+            <div id="item-form-container" style="display: none;">
+                <div class="form-card">
+                    <h3 id="form-title">Add New Coffee Auction</h3>
+                    <form id="item-form" action="process_item.php" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="action" id="form-action" value="add">
+                        <input type="hidden" name="item_id" id="form-item-id" value="">
+                        
+                        <div class="form-group">
+                            <label for="item-name">Coffee Name</label>
+                            <input type="text" id="item-name" name="name" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="item-description">Description</label>
+                            <textarea id="item-description" name="description" class="form-control" rows="3" required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="item-price">Starting Price (₱)</label>
+                            <input type="number" id="item-price" name="starting_price" class="form-control" min="0.01" step="0.01" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bid-end-date">Bid End Date/Time</label>
+                            <input type="datetime-local" id="bid-end-date" name="bid_end_date" class="form-control" required>
+                            <small>Set the date and time when bidding will close</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="is-limited" name="is_limited" value="1">
+                                This is a limited quantity item
+                            </label>
+                        </div>
+                        
+                        <div class="form-group" id="quantity-group" style="display: none;">
+                            <label for="item-quantity">Available Quantity</label>
+                            <input type="number" id="item-quantity" name="quantity" class="form-control" min="1" value="1">
+                        </div>
+                        
+                        <div class="form-group" id="image-upload-group">
+                            <label for="item-image">Image</label>
+                            <input type="file" id="item-image" name="image" class="form-control" accept="image/*">
+                            <small>Recommended size: 600x400 pixels</small>
+                            <div id="current-image-container" style="display: none; margin-top: 10px;">
+                                <p>Current Image:</p>
+                                <img id="current-image-preview" src="" style="max-width: 200px; max-height: 150px;">
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" id="cancel-item-form" class="btn btn-outline">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Item</button>
+                        </div>
+                    </form>
+                </div>
             </div>
             
             <div class="table-responsive">
@@ -309,8 +411,8 @@ $currentDateTime = date('Y-m-d\TH:i');
                                          class="item-thumbnail">
                                 </td>
                                 <td>
-                                    <a href="admin.php?edit_item=<?= $item['id'] ?>#items-tab" 
-                                       class="btn btn-outline btn-small">Edit</a>
+                                    <a href="product_view.php?id=<?= $item['id'] ?>&admin=1" class="btn btn-outline btn-small">View</a>
+                                    <button onclick="setupEditItem(<?= $item['id'] ?>)" class="btn btn-outline btn-small">Edit</button>
                                     <form action="process_item.php" method="post" class="inline-form">
                                         <input type="hidden" name="item_id" value="<?= $item['id'] ?>">
                                         <button type="submit" name="action" value="delete" 
@@ -387,34 +489,92 @@ $currentDateTime = date('Y-m-d\TH:i');
             });
         });
         
+        // Edit Item Functionality
+        function setupEditItem(itemId) {
+            fetch(`process_item.php?edit_item=${itemId}`)
+                .then(response => response.json())
+                .then(item => {
+                    // Show the form
+                    document.getElementById('item-form-container').style.display = 'block';
+                    
+                    // Update form title and action
+                    document.getElementById('form-title').textContent = 'Edit Coffee Auction';
+                    document.getElementById('form-action').value = 'edit';
+                    document.getElementById('form-item-id').value = item.id;
+                    
+                    // Fill form fields
+                    document.getElementById('item-name').value = item.name;
+                    document.getElementById('item-description').value = item.description;
+                    document.getElementById('item-price').value = item.starting_price;
+                    
+                    // Format date for datetime-local input
+                    const endDate = new Date(item.bid_end_date);
+                    const formattedDate = endDate.toISOString().slice(0, 16);
+                    document.getElementById('bid-end-date').value = formattedDate;
+                    
+                    // Handle limited quantity
+                    const isLimited = document.getElementById('is-limited');
+                    const quantityGroup = document.getElementById('quantity-group');
+                    if (item.is_limited == 1) {
+                        isLimited.checked = true;
+                        quantityGroup.style.display = 'block';
+                        document.getElementById('item-quantity').value = item.quantity;
+                    } else {
+                        isLimited.checked = false;
+                        quantityGroup.style.display = 'none';
+                    }
+                    
+                    // Handle image (show current image preview)
+                    const imageUploadGroup = document.getElementById('image-upload-group');
+                    const currentImageContainer = document.getElementById('current-image-container');
+                    const currentImagePreview = document.getElementById('current-image-preview');
+                    
+                    currentImagePreview.src = `images/${item.image}`;
+                    currentImageContainer.style.display = 'block';
+                    imageUploadGroup.querySelector('label').textContent = 'Change Image (optional)';
+                    
+                    // Scroll to form
+                    document.getElementById('item-form-container').scrollIntoView({ behavior: 'smooth' });
+                })
+                .catch(error => {
+                    console.error('Error fetching item data:', error);
+                    alert('Error loading item data. Please try again.');
+                });
+        }
+
         // Toggle limited quantity fields
         document.getElementById('is-limited').addEventListener('change', function() {
-            document.getElementById('quantity-group').style.display = this.checked ? 'block' : 'none';
-            if (this.checked) {
-                document.getElementById('item-quantity').required = true;
-            } else {
-                document.getElementById('item-quantity').required = false;
-            }
+            const quantityGroup = document.getElementById('quantity-group');
+            quantityGroup.style.display = this.checked ? 'block' : 'none';
         });
         
-        // Add item form toggle
+        // Add item button
         document.getElementById('add-item-btn').addEventListener('click', function() {
-            document.getElementById('add-item-form').style.display = 'block';
-        });
-        
-        document.getElementById('cancel-add-item').addEventListener('click', function() {
-            document.getElementById('add-item-form').style.display = 'none';
-        });
-        
-        // Set minimum datetime for the end date picker
-        const endDateInput = document.getElementById('bid-end-date');
-        if (endDateInput) {
+            const formContainer = document.getElementById('item-form-container');
+            const formTitle = document.getElementById('form-title');
+            const form = document.getElementById('item-form');
+            
+            formContainer.style.display = 'block';
+            formTitle.textContent = 'Add New Coffee Auction';
+            form.reset();
+            document.getElementById('form-action').value = 'add';
+            document.getElementById('form-item-id').value = '';
+            document.getElementById('quantity-group').style.display = 'none';
+            document.getElementById('current-image-container').style.display = 'none';
+            document.getElementById('image-upload-group').querySelector('label').textContent = 'Image';
+            
+            // Set minimum datetime (now + 1 hour)
             const now = new Date();
-            // Add 1 hour minimum duration for auctions
             now.setHours(now.getHours() + 1);
-            const minDate = now.toISOString().slice(0, 16);
-            endDateInput.min = minDate;
-        }
+            document.getElementById('bid-end-date').min = now.toISOString().slice(0, 16);
+            
+            formContainer.scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        // Cancel form
+        document.getElementById('cancel-item-form').addEventListener('click', function() {
+            document.getElementById('item-form-container').style.display = 'none';
+        });
         
         // Toggle search form
         document.getElementById('search-users-btn').addEventListener('click', function() {
@@ -442,4 +602,4 @@ $currentDateTime = date('Y-m-d\TH:i');
         });
     </script>
 </body>
-</html>
+</html> 
