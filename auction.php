@@ -212,8 +212,55 @@ $highlight_item = isset($_GET['new_item']) ? (int)$_GET['new_item'] : 0;
         </div>
         <div class="navbar-right">
             <?php if (isset($_SESSION['user_id'])): ?>
-                <span class="user-greeting">Hi, <?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
-                <a href="logout.php" class="btn btn-outline">Logout</a>
+                <div class="notification-container">
+                    <span class="user-greeting">Hi, <?= htmlspecialchars($_SESSION['user_name']) ?></span>
+                    <?php
+                    // Get unread notification count
+                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = FALSE");
+                    $stmt->execute([$_SESSION['user_id']]);
+                    $unreadCount = $stmt->fetchColumn();
+                    ?>
+                    <div class="notification-icon">
+                        <i class="fas fa-bell"></i>
+                        <?php if ($unreadCount > 0): ?>
+                            <span class="notification-badge"><?= $unreadCount ?></span>
+                        <?php endif; ?>
+                        <div class="notification-dropdown">
+                            <div class="notification-header">
+                                <h4>Notifications</h4>
+                                <a href="mark_all_read.php" class="mark-all-read">Mark all as read</a>
+                            </div>
+                            <div class="notification-list">
+                                <?php
+                                $notifications = getUserNotifications($_SESSION['user_id']);
+                                
+                                if (empty($notifications)) {
+                                    echo '<div class="notification-item empty">No notifications</div>';
+                                } else {
+                                    foreach ($notifications as $notification) {
+                                        $class = $notification['is_read'] ? 'read' : 'unread';
+                                        echo '<div class="notification-item '.$class.'">';
+                                        echo htmlspecialchars($notification['message']);
+                                        
+                                        // Add exact time along with relative time
+                                        $createdAt = new DateTime($notification['created_at']);
+                                        $createdAt->setTimezone(new DateTimeZone('Asia/Manila'));
+                                        echo '<div class="notification-time" title="'.$createdAt->format('M j, Y h:i A').'">';
+                                        echo time_elapsed_string($notification['created_at']);
+                                        echo '</div>';
+                                        
+                                        if (!$notification['is_read']) {
+                                            echo '<a href="mark_read.php?id='.$notification['id'].'" class="mark-read">Mark read</a>';
+                                        }
+                                        echo '</div>';
+                                    }
+                                }
+                                ?>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="logout.php" class="btn btn-outline">Logout</a>
+                </div>
             <?php else: ?>
                 <a href="login.php" class="btn btn-outline">Login</a>
                 <a href="register.php" class="btn btn-primary">Register</a>

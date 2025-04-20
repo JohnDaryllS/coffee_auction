@@ -171,6 +171,145 @@ p {
     }
 }
 
+/* Notification Styles */
+.notification-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.notification-icon {
+    position: relative;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: var(--text-color);
+}
+
+.notification-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: var(--error-color);
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.notification-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 350px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    z-index: 1000;
+    display: none;
+    max-height: 500px;
+    overflow: hidden;
+    flex-direction: column;
+}
+
+.notification-icon:hover .notification-dropdown {
+    display: flex;
+}
+
+.notification-header {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.notification-header h4 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.mark-all-read {
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.notification-list {
+    padding: 0;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.notification-item {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    position: relative;
+}
+
+.notification-item.empty {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #666;
+}
+
+.notification-item.unread {
+    background-color: #f8f9fa;
+}
+
+.notification-time {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.notification-time:before {
+    content: '·';
+    margin-right: 3px;
+}
+
+.notification-item.unread .notification-time {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.mark-read {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+/* Scrollbar styling */
+.notification-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notification-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 0 8px 8px 0;
+}
+
+.notification-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.notification-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
 /* Admin-specific nav styles */
 .admin-nav .navbar-center {
     gap: 1rem;
@@ -1190,6 +1329,27 @@ small {
     .auction-item-image {
         width: 100%;
         height: 200px;
+    }
+
+    .notification-dropdown {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 12px 12px 0 0;
+        max-height: 60vh;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .notification-header {
+        padding: 15px;
+    }
+    
+    .notification-item {
+        padding: 15px;
     }
     
     .footer-grid {

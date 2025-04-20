@@ -67,6 +67,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$item_id]);
         }
 
+        // Add notification to bidder
+        addNotification($user_id, "You placed a bid of ₱" . number_format($bid_amount, 2) . " on " . $item['name']);
+
+        // Notify previous highest bidder if they were outbid
+        $stmt = $pdo->prepare("SELECT user_id FROM bids WHERE item_id = ? ORDER BY bid_amount DESC LIMIT 1,1");
+        $stmt->execute([$item_id]);
+        $prevBidder = $stmt->fetch();
+        
+        if ($prevBidder && $prevBidder['user_id'] != $user_id) {
+            addNotification(
+                $prevBidder['user_id'], 
+                "Someone outbid you on " . $item['name'] . " with ₱" . number_format($bid_amount, 2)
+            );
+        }
+
         $pdo->commit();
 
         $_SESSION['success'] = 'Bid placed successfully!';

@@ -13,7 +13,7 @@
     <nav class="navbar">
         <div class="navbar-left">
             <div class="logo">
-                <span class="logo-icon">☕</span>
+                <img src="images/crop.png" alt="Coffee-Auction" style="width:50px;">
                 <span class="logo-text">Coffee Auction</span>
             </div>
         </div>
@@ -41,14 +41,15 @@
                     <?php 
                     if ($_GET['error'] == 'email') echo "Email already exists";
                     if ($_GET['error'] == 'password') echo "Passwords do not match";
+                    if ($_GET['error'] == 'phone') echo "Invalid phone number format";
                     ?>
                 </div>
             <?php endif; ?>
             
-            <form action="process_register.php" method="post">
+            <form action="process_register.php" method="post" onsubmit="return validateForm()">
                 <div class="form-group">
                     <label for="fullname">Full Name</label>
-                    <input type="text" id="fullname" name="fullname" class="form-control" required>
+                    <input type="text" id="fullname" name="fullname" class="form-control" required minlength="3">
                 </div>
                 
                 <div class="form-group">
@@ -58,12 +59,14 @@
                 
                 <div class="form-group">
                     <label for="phone">Phone Number</label>
-                    <input type="tel" id="phone" name="phone" class="form-control" required>
+                    <input type="tel" id="phone" name="phone" class="form-control" required pattern="[0-9]{10,15}">
+                    <small>Format: 09123456789 (10-15 digits)</small>
                 </div>
                 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" name="password" class="form-control" required>
+                    <input type="password" id="password" name="password" class="form-control" required minlength="8">
+                    <small>Minimum 8 characters</small>
                 </div>
                 
                 <div class="form-group">
@@ -165,5 +168,18 @@
         </div>
     </div>
 </footer>
+<script>
+        function validateForm() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return false;
+            }
+            
+            return true;
+        }
+    </script>
 </body>
 </html>
