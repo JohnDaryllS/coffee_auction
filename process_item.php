@@ -15,12 +15,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['name']);
         $description = trim($_POST['description']);
         $starting_price = (float)$_POST['starting_price'];
+        $bid_start_date = $_POST['bid_start_date'];
         $bid_end_date = $_POST['bid_end_date'];
         $is_limited = isset($_POST['is_limited']) ? 1 : 0;
         $quantity = $is_limited ? (int)$_POST['quantity'] : 0;
         
         // Validate required fields
-        if (empty($name) || empty($description) || empty($bid_end_date)) {
+        if (empty($name) || empty($description) || empty($bid_start_date) || empty($bid_end_date)) {
             $_SESSION['error'] = 'All fields are required';
             header('Location: admin.php#items-tab');
             exit;
@@ -33,11 +34,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
         
-        // Validate date
+        // Validate dates
         $now = new DateTime();
+        $start_date = new DateTime($bid_start_date);
         $end_date = new DateTime($bid_end_date);
-        if ($end_date <= $now) {
-            $_SESSION['error'] = 'End date must be in the future';
+        
+        if ($start_date <= $now) {
+            $_SESSION['error'] = 'Start date must be in the future';
+            header('Location: admin.php#items-tab');
+            exit;
+        }
+        
+        if ($end_date <= $start_date) {
+            $_SESSION['error'] = 'End date must be after start date';
             header('Location: admin.php#items-tab');
             exit;
         }
@@ -89,12 +98,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_path)) {
             // Insert into database
             $stmt = $pdo->prepare("INSERT INTO items 
-                                 (name, description, starting_price, bid_end_date, image, is_limited, quantity, items_sold) 
-                                 VALUES (?, ?, ?, ?, ?, ?, ?, 0)");
+                                 (name, description, starting_price, bid_start_date, bid_end_date, image, is_limited, quantity, items_sold) 
+                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)");
             $stmt->execute([
                 $name, 
                 $description, 
                 $starting_price, 
+                $bid_start_date, 
                 $bid_end_date, 
                 $new_filename, 
                 $is_limited, 
@@ -110,7 +120,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
     } 
-    // In the delete action section, replace with this:
     elseif ($action === 'delete') {
         $item_id = (int)$_POST['item_id'];
         
@@ -154,21 +163,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['name']);
         $description = trim($_POST['description']);
         $starting_price = (float)$_POST['starting_price'];
+        $bid_start_date = $_POST['bid_start_date'];
         $bid_end_date = $_POST['bid_end_date'];
         $is_limited = isset($_POST['is_limited']) ? 1 : 0;
         $quantity = $is_limited ? (int)$_POST['quantity'] : 0;
         
         // Validate inputs
-        if (empty($name) || empty($description) || empty($bid_end_date)) {
+        if (empty($name) || empty($description) || empty($bid_start_date) || empty($bid_end_date)) {
             $_SESSION['error'] = 'All fields are required';
             header('Location: admin.php?edit_item='.$item_id.'#items-tab');
             exit;
         }
         
         $now = new DateTime();
+        $start_date = new DateTime($bid_start_date);
         $end_date = new DateTime($bid_end_date);
-        if ($end_date <= $now) {
-            $_SESSION['error'] = 'End date must be in the future';
+        
+        if ($start_date <= $now) {
+            $_SESSION['error'] = 'Cannot change start date to past time';
+            header('Location: admin.php?edit_item='.$item_id.'#items-tab');
+            exit;
+        }
+        
+        if ($end_date <= $start_date) {
+            $_SESSION['error'] = 'End date must be after start date';
             header('Location: admin.php?edit_item='.$item_id.'#items-tab');
             exit;
         }
@@ -223,11 +241,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Update database with new image
                 $stmt = $pdo->prepare("UPDATE items SET 
                                       name = ?, description = ?, starting_price = ?, 
-                                      bid_end_date = ?, image = ?, is_limited = ?, quantity = ?
+                                      bid_start_date = ?, bid_end_date = ?, image = ?, 
+                                      is_limited = ?, quantity = ?
                                       WHERE id = ?");
                 $stmt->execute([
                     $name, $description, $starting_price, 
-                    $bid_end_date, $new_filename, $is_limited, $quantity, $item_id
+                    $bid_start_date, $bid_end_date, $new_filename, 
+                    $is_limited, $quantity, $item_id
                 ]);
                 
                 $_SESSION['message'] = 'Item updated successfully';
@@ -242,11 +262,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Update without changing image
             $stmt = $pdo->prepare("UPDATE items SET 
                                   name = ?, description = ?, starting_price = ?, 
-                                  bid_end_date = ?, is_limited = ?, quantity = ?
+                                  bid_start_date = ?, bid_end_date = ?, 
+                                  is_limited = ?, quantity = ?
                                   WHERE id = ?");
             $stmt->execute([
                 $name, $description, $starting_price, 
-                $bid_end_date, $is_limited, $quantity, $item_id
+                $bid_start_date, $bid_end_date, 
+                $is_limited, $quantity, $item_id
             ]);
             
             $_SESSION['message'] = 'Item updated successfully';
@@ -271,6 +293,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['edit_item'])) {
             'name' => $item['name'],
             'description' => $item['description'],
             'starting_price' => $item['starting_price'],
+            'bid_start_date' => $item['bid_start_date'],
             'bid_end_date' => $item['bid_end_date'],
             'is_limited' => $item['is_limited'],
             'quantity' => $item['quantity'],
